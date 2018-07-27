@@ -44,8 +44,9 @@
       </None>
     </ItemGroup>
 
+    <Import Condition="'$(TargetFramework)' == 'net35'" Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
     <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
-        <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
         <Reference Include="System" />
         <Reference Include="System.Core">
         </Reference>
@@ -55,7 +56,28 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
 
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
       <PostBuildEvent>$(ProjectDir)PostBuildEvent</PostBuildEvent>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' And '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+      <CustomCommands>
+        <CustomCommands>
+          <Command>
+            <type>AfterBuild</type>
+            <command>$(ProjectDir)PostBuildEvent</command>
+          </Command>
+        </CustomCommands>
+      </CustomCommands>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+      <CustomCommands>
+        <CustomCommands>
+          <Command>
+            <type>AfterBuild</type>
+            <command>PostBuildEvent</command>
+          </Command>
+        </CustomCommands>
+      </CustomCommands>
     </PropertyGroup>
 </Project>
