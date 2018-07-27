@@ -25,3 +25,4 @@ Release/*.pdb
 msg_gen/msg_gen.exe
 *.Debug.cachefile
 XmlRpc_Wrapper/XmlRpcWin32.instr.pdb
+.vs/

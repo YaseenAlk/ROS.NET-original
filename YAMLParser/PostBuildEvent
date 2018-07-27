@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# don't currently need a post-build event for mac/linux!
+echo "No post-build event needed for unix"
+
+# windows batch version: needs to be converted to bash
+#cd "$(TargetDir)"
+#if not "$(ConfigurationName)"  == "Debugger" YAMLParser.exe $(ConfigurationName) "$(SolutionDir) " "$(ProjectDir).." 
+#echo YAMLParser.exe $(ConfigurationName) "$(SolutionDir) " "$(ProjectDir).."
