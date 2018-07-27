@@ -27,4 +27,4 @@ msg_gen/msg_gen.exe
 XmlRpc_Wrapper/XmlRpcWin32.instr.pdb
 
 .vs/
-YAMLParser/YAMLParser.sln
+YAMLParser/*.sln
