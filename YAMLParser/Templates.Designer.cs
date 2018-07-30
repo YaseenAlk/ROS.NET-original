@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YAMLParser {
+namespace YAMLParser_NetCore {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace YAMLParser {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Templates {
@@ -39,7 +39,7 @@ namespace YAMLParser {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YAMLParser.Templates", typeof(Templates).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YAMLParser_NetCore.Templates", typeof(Templates).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -132,53 +132,24 @@ namespace YAMLParser {
         ///using System.IO;
         ///using System.Runtime.InteropServices;
         ///using uint8 = System.Byte;
-        ///
-        ///namespace Messages
-        ///{
-        ///	[System.Diagnostics.DebuggerStepThrough]
-        ///	public class $WHATAMI : IRosMessage
-        ///	{
-        ///		$$DOLLADOLLABILLS
-        ///
-        ///		[System.Diagnostics.DebuggerStepThrough]
-        ///		public $WHATAMI() : base($MYMSGTYPE, $MYMESSAGEDEFINITION, $MYHASHEADER, $MYISMETA, new Dictionary&lt;string, MsgFieldInfo&gt;$MYFIELDS, &quot;$MYMD5SUM&quot;)
-        ///		{
-        ///			$NULL [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string MsgPlaceHolder {
-            get {
-                return ResourceManager.GetString("MsgPlaceHolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to #region Using
-        ///
-        ///using System;
-        ///using System.Collections;
-        ///using System.Collections.Generic;
-        ///using System.Diagnostics;
-        ///using System.IO;
-        ///using System.Linq;
-        ///using System.Reflection;
-        ///using System.Runtime.InteropServices;
-        ///using System.Text;
-        ///using String = Messages.std_msgs.String;
-        ///
-        ///#endregion
+        ///using Messages.geometry_msgs;
+        ///using Messages.sensor_msgs;
+        ///using Messages.actionlib_msgs;
         ///
         ///namespace Messages
         ///{
         ///#if !TRACE
         ///    [System.Diagnostics.DebuggerStepThrough]
-        ///#else
-        ///    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         ///#endif
-        ///    public static c [rest of string was truncated]&quot;;.
+        ///    public class $WHATAMI : IRosMessage
+        ///    {
+        ///        $$DOLLADOLLABILLS
+        ///
+        ///        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBr [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SerializationHelper {
+        internal static string MsgPlaceHolder {
             get {
-                return ResourceManager.GetString("SerializationHelper", resourceCulture);
+                return ResourceManager.GetString("MsgPlaceHolder", resourceCulture);
             }
         }
         
@@ -193,16 +164,14 @@ namespace YAMLParser {
         ///
         ///namespace Messages
         ///{
-        ///	[System.Diagnostics.DebuggerStepThrough]
-        ///	public class $WHATAMI : IRosService
-        ///	{
-        ///		[System.Diagnostics.DebuggerStepThrough]
-        ///		public $WHATAMI() : base($MYSRVTYPE, $MYSERVICEDEFINITION, &quot;$MYSRVMD5SUM&quot;)
-        ///		{
-        ///			InitSubtypes(new Request(), new Response());
-        ///		}
-        ///		
-        ///		public Response Invoke(Func&lt;Request, Res [rest of string was truncated]&quot;;.
+        ///#if !TRACE
+        ///    [System.Diagnostics.DebuggerStepThrough]
+        ///#endif
+        ///    public class $WHATAMI : IRosService
+        ///    {
+        ///        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        ///        public override SrvTypes srvtype() { return $MYSRVTYPE; }
+        ///        [System.ComponentModel.E [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SrvPlaceHolder {
             get {
