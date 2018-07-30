@@ -47,8 +47,8 @@
         <SubType>Designer</SubType>
       </None>
     </ItemGroup>
-
-    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' And '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
       <CustomCommands>
         <CustomCommands>
           <Command>
@@ -58,15 +58,4 @@
         </CustomCommands>
       </CustomCommands>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-      <CustomCommands>
-        <CustomCommands>
-          <Command>
-            <type>AfterBuild</type>
-            <command>PostBuildEvent</command>
-          </Command>
-        </CustomCommands>
-      </CustomCommands>
-    </PropertyGroup>
-
 </Project>
