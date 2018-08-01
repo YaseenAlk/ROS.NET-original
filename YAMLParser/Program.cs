@@ -17,8 +17,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using FauxMessages;
+using static FauxMessages.MsgsFile;
 
 #endregion
 
@@ -36,6 +38,7 @@ namespace YAMLParser
         private static string configuration = "Debug"; //Debug, Release, etc.
         private static void Main(string[] args)
         {
+#if NET35
             string solutiondir;
             bool interactive = false; //wait for ENTER press when complete
             int firstarg = 0;
@@ -90,12 +93,17 @@ namespace YAMLParser
             {
                 srvFiles.Add(new SrvsFile(path));
             }
+            if (!StdMsgsProcessed()) // may seem obvious, but needed so that all other messages can resolve...
+            {
+                Console.WriteLine("std_msgs was not found in any search directory. Exiting...");
+                return;
+            }
             if (paths.Count + pathssrv.Count > 0)
             {
                 MakeTempDir();
                 GenerateFiles(msgsFiles, srvFiles);
                 GenerateProject(msgsFiles, srvFiles);
-                BuildProject();
+                BuildProjectMSBUILD();
             }
             else
             {
@@ -109,6 +117,78 @@ namespace YAMLParser
                 Console.WriteLine("Finished. Press enter.");
                 Console.ReadLine();
             }
+#elif NETCOREAPP2_1
+            //args = new string[]{"/Users/yaseen/Documents/GitHub/ROS-NET-modified", "/Users/yaseen/Documents/GitHub/ROS-NET-modified/common_msgs/extremely_basic_msg"};
+            if (args.Length < 1)
+            {
+                Console.WriteLine("Usage:\tdotnet YAMLParser_NetCore.dll <DLL output path> [... other directories to search]\n\tThe Messages dll will be output to <DLL output folder>/Messages/Messages.dll");
+                return;
+            }
+
+            string specifiedOutput = args[0];
+
+            if (!Directory.Exists(specifiedOutput))
+            {
+                Console.WriteLine("DLL Output Path does not exist");
+                return;
+            }
+
+            outputdir = Path.Combine(specifiedOutput, outputdir);
+            List<MsgFileLocation> msgFileLocs = new List<MsgFileLocation>();
+            List<MsgFileLocation> srvFileLocs = new List<MsgFileLocation>();
+
+            string[] searchDirectories = args.Skip(1).ToArray();
+            foreach (string dir in searchDirectories)
+            {
+                if (!Directory.Exists(specifiedOutput))
+                {
+                    Console.WriteLine("Skipping directory '" + dir + "' because it does not exist.");
+                    continue;
+                }
+                string d = new DirectoryInfo(dir).FullName;
+                Console.WriteLine("Spelunking in " + d);
+                MsgFileLocator.findMessages(msgFileLocs, srvFileLocs, d);
+            }
+
+            if ((msgFileLocs.Count + srvFileLocs.Count) == 0)
+            {
+                Console.WriteLine("Not going to generate Messages.dll because there were no .msg or .srv files found in the specified arguments");
+                return;
+            }
+
+            Console.WriteLine("Generating Messages C# project...");
+            msgFileLocs = MsgFileLocator.sortMessages(msgFileLocs);
+            foreach (MsgFileLocation path in msgFileLocs)
+            {
+                msgsFiles.Add(new MsgsFile(path));
+            }
+            foreach (MsgFileLocation path in srvFileLocs)
+            {
+                srvFiles.Add(new SrvsFile(path));
+            }
+
+            if (!StdMsgsProcessed()) // may seem obvious, but needed so that all other messages can resolve...
+            {
+                Console.WriteLine("std_msgs was not found in any search directory. Exiting...");
+                return;
+            }
+
+            Console.WriteLine("making temp dir...");
+            MakeTempDir();
+            Console.WriteLine("Generating files...");
+            GenerateFiles(msgsFiles, srvFiles);
+            Console.WriteLine("Generating project...");
+            GenerateProject(msgsFiles, srvFiles);
+            //BuildProjectMSBUILD();
+#else
+            Console.WriteLine("Unsupported TargetFramework. Must be .NET Framework v3.5 or .NET Core netcoreapp2.1");
+            return;
+#endif
+        }
+
+        public static bool StdMsgsProcessed()
+        {
+            return MsgsFile.resolver.ContainsKey("std_msgs");
         }
 
         public static void MakeTempDir()
@@ -172,7 +252,7 @@ namespace YAMLParser
                 foreach (MsgsFile m in files.Except(mresolved))
                 {
                     string md5 = null;
-                    string typename = null;;
+                    string typename = null;
                     md5 = MD5.Sum(m);
                     typename = m.Name;
                     if (md5 != null && !md5.StartsWith("$") && !md5.EndsWith("MYMD5SUM"))
@@ -229,10 +309,27 @@ namespace YAMLParser
         {
             if (!Directory.Exists(Path.Combine(outputdir, "Properties")))
                 Directory.CreateDirectory(Path.Combine(outputdir, "Properties"));
-            File.WriteAllText(Path.Combine(outputdir, "SerializationHelper.cs"), Templates.SerializationHelper);
-            File.WriteAllText(Path.Combine(outputdir, "Interfaces.cs"), Templates.Interfaces);
-            File.WriteAllText(Path.Combine(outputdir, "Properties", "AssemblyInfo.cs"), Templates.AssemblyInfo);
-            string[] lines = Templates.MessagesProj.Split('\n');
+
+            string sHelperFile, interfacesFile, assemblyInfoFile;
+            string lineFile;
+#if NET35
+            sHelperFile = Templates.SerializationHelper;
+            interfacesFile = Templates.Interfaces;
+            assemblyInfoFile = Templates.AssemblyInfo;
+            lineFile = Templates.MessagesProj;
+#elif NETCOREAPP2_1
+            sHelperFile = "";   // blank in the original version?
+            interfacesFile = Templates_NetCore.Interfaces;
+            assemblyInfoFile = Templates_NetCore.AssemblyInfo;
+            lineFile = Templates_NetCore.MessagesProj;
+#else
+            throw new PlatformNotSupportedException("Unsupported TargetFramework. Must be .NET Framework v3.5 or .NET Core netcoreapp2.1");
+#endif
+
+            File.WriteAllText(Path.Combine(outputdir, "SerializationHelper.cs"), sHelperFile);
+            File.WriteAllText(Path.Combine(outputdir, "Interfaces.cs"), interfacesFile);
+            File.WriteAllText(Path.Combine(outputdir, "Properties", "AssemblyInfo.cs"), assemblyInfoFile);
+            string[] lines = lineFile.Split('\n');
             string output = "";
             for (int i = 0; i < lines.Length; i++)
             {
@@ -271,7 +368,7 @@ namespace YAMLParser
             get
             {
                 if (__where_be_at_my_vc____is != null) return __where_be_at_my_vc____is;
-                foreach (string possibledir in new[] {Path.DirectorySeparatorChar + Path.Combine("Microsoft.NET", "Framework64") + Path.DirectorySeparatorChar, Path.DirectorySeparatorChar + Path.Combine("Microsoft.NET", "Framework") + Path.DirectorySeparatorChar})
+                foreach (string possibledir in new[] { Path.DirectorySeparatorChar + Path.Combine("Microsoft.NET", "Framework64") + Path.DirectorySeparatorChar, Path.DirectorySeparatorChar + Path.Combine("Microsoft.NET", "Framework") + Path.DirectorySeparatorChar })
                 {
                     foreach (string possibleversion in new[] {"v3.5", "v4.0"})
                     {
@@ -292,12 +389,12 @@ namespace YAMLParser
             }
         }
 
-        public static void BuildProject()
+        public static void BuildProjectMSBUILD()
         {
-            BuildProject("BUILDING GENERATED PROJECT WITH MSBUILD!");
+            BuildProjectMSBUILD("BUILDING GENERATED PROJECT WITH MSBUILD!");
         }
 
-        public static void BuildProject(string spam)
+        public static void BuildProjectMSBUILD(string spam)
         {
             string F = VCDir + Path.DirectorySeparatorChar + "msbuild.exe";
             if (!File.Exists(F))
@@ -306,7 +403,7 @@ namespace YAMLParser
                 throw up;
             }
             Console.WriteLine("\n\n" + spam);
-            string args = "/nologo \"" + Path.Combine(outputdir, name + ".csproj") + Path.DirectorySeparatorChar + " /property:Configuration="+configuration;
+            string args = "/nologo \"" + Path.Combine(outputdir, name + ".csproj") + Path.DirectorySeparatorChar + " /property:Configuration=" + configuration;
             Process proc = new Process();
             proc.StartInfo.RedirectStandardOutput = true;
             proc.StartInfo.RedirectStandardError = true;
@@ -410,4 +507,25 @@ namespace YAMLParser
             appendto += "\n\t\t};";
         }
     }
+
+#if NETCOREAPP2_1
+    public static class Templates_NetCore
+    {
+        public static string SrvPlaceHolder = GetResource("YAMLParser_NetCore.TemplateProject.SrvPlaceHolder._cs");
+        public static string MsgPlaceHolder = GetResource("YAMLParser_NetCore.TemplateProject.PlaceHolder._cs");
+        public static string Interfaces = GetResource("YAMLParser_NetCore.TemplateProject.Interfaces.cs");
+        public static string AssemblyInfo = GetResource("YAMLParser_NetCore.TemplateProject.AssemblyInfo._cs");
+        public static string MessagesProj = GetResource("YAMLParser_NetCore.TemplateProject.MessagesNetCore._csproj");
+
+        private static string GetResource(string location)
+        {
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(location))
+            {
+                TextReader tr = new StreamReader(stream);
+                string fileContents = tr.ReadToEnd();
+                return fileContents;
+            }
+        }
+    }
+#endif
 }
