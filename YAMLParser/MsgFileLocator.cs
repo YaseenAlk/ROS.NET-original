@@ -47,7 +47,7 @@ namespace YAMLParser
         /// <returns>"package name"</returns>
         private static string getPackageName(string path)
         {
-            DirectoryInfo innermostPath = new DirectoryInfo(path);
+            DirectoryInfo innermostPath = Directory.GetParent(path);
             string foldername = innermostPath.Name;
             if (msg_gen_folder_names.Contains(foldername))
                 foldername = Directory.GetParent(innermostPath.FullName).Name;
