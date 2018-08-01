@@ -140,7 +140,7 @@ namespace YAMLParser
             string[] searchDirectories = args.Skip(1).ToArray();
             foreach (string dir in searchDirectories)
             {
-                if (!Directory.Exists(specifiedOutput))
+                if (!Directory.Exists(dir))
                 {
                     Console.WriteLine("Skipping directory '" + dir + "' because it does not exist.");
                     continue;
