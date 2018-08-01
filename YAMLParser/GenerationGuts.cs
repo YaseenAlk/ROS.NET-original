@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using YAMLParser;
@@ -99,7 +100,7 @@ namespace FauxMessages
                 Directory.CreateDirectory(outdir);
             string contents = ToString();
             if (contents != null)
-                File.WriteAllText(Path.Combine(outdir + msgfilelocation.basename + ".cs"), contents.Replace("FauxMessages", "Messages"));
+                File.WriteAllText(Path.Combine(outdir, msgfilelocation.basename + ".cs"), contents.Replace("FauxMessages", "Messages"));
         }
 
         public override string ToString()
@@ -108,7 +109,15 @@ namespace FauxMessages
             {
                 requestfronthalf = "";
                 requestbackhalf = "";
-                string[] lines = Templates.SrvPlaceHolder.Split('\n');
+
+                string[] lines;
+#if NET35
+                lines = Templates.SrvPlaceHolder.Split('\n');
+#elif NETCOREAPP2_1
+                lines = Templates_NetCore.SrvPlaceHolder.Split('\n');
+#else
+                throw new PlatformNotSupportedException("Unsupported TargetFramework. Must be .NET Framework v3.5 or .NET Core netcoreapp2.1");
+#endif
                 int section = 0;
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -152,7 +161,7 @@ namespace FauxMessages
             /*       CODE BLOCK DUMP           */
             /***********************************/
 
-            #region definitions
+#region definitions
 
             for (int i = 0; i < def.Count; i++)
             {
@@ -196,17 +205,17 @@ namespace FauxMessages
             if (resd != null)
                 ResponseDefinition = resd.ToString().Trim();
 
-            #endregion
+#endregion
 
-            #region THE SERVICE
+#region THE SERVICE
 
             GUTS = GUTS.Replace("$WHATAMI", classname);
             GUTS = GUTS.Replace("$MYSRVTYPE", "SrvTypes." + Namespace.Replace("Messages.", "") + "__" + classname);
             GUTS = GUTS.Replace("$MYSERVICEDEFINITION", "@\"" + MessageDefinition + "\"");
 
-            #endregion
+#endregion
 
-            #region request
+#region request
 
             string RequestDict = Request.GenFields();
             meta = Request.meta;
@@ -218,9 +227,9 @@ namespace FauxMessages
             GUTS = GUTS.Replace("$REQUESTNULLCONSTBODY", "");
             GUTS = GUTS.Replace("$REQUESTEXTRACONSTRUCTOR", "");
 
-            #endregion
+#endregion
 
-            #region response
+#region response
 
             string ResponseDict = Response.GenFields();
             GUTS = GUTS.Replace("$RESPONSEMYISMETA", Response.meta.ToString().ToLower());
@@ -231,7 +240,7 @@ namespace FauxMessages
             GUTS = GUTS.Replace("$RESPONSENULLCONSTBODY", "");
             GUTS = GUTS.Replace("$RESPONSEEXTRACONSTRUCTOR", "");
 
-            #endregion
+#endregion
 
 #region MD5
             GUTS = GUTS.Replace("$REQUESTMYMD5SUM", MD5.Sum(Request));
@@ -524,7 +533,16 @@ namespace FauxMessages
                 wasnull = true;
                 fronthalf = "";
                 backhalf = "";
-                string[] lines = Templates.MsgPlaceHolder.Split('\n');
+
+                string[] lines;
+#if NET35
+                lines = Templates.MsgPlaceHolder.Split('\n');
+#elif NETCOREAPP2_1
+                lines = Templates_NetCore.MsgPlaceHolder.Split('\n');
+#else
+                throw new PlatformNotSupportedException("Unsupported TargetFramework. Must be .NET Framework v3.5 or .NET Core netcoreapp2.1");
+#endif
+
                 bool hitvariablehole = false;
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -614,7 +632,7 @@ namespace FauxMessages
                     def[i] = def[i].Replace("  ", " ");
                 def[i] = def[i].Replace(" = ", "=");
             }
-            GUTS = GUTS.Replace("$MYMESSAGEDEFINITION", "@\"" + def.Aggregate("", (current, d) => current + (d + "\n")).Trim('\n') + "\"");
+            GUTS = GUTS.Replace("$MYMESSAGEDEFINITION", "@\"" + def.Aggregate("", (current, d) => current + (d + "\n")).Trim('\n').Replace("\"", "\"\"") + "\"");
             GUTS = GUTS.Replace("$MYHASHEADER", HasHeader.ToString().ToLower());
             GUTS = GUTS.Replace("$MYFIELDS", GeneratedDictHelper.Length > 5 ? "{{" + GeneratedDictHelper + "}}" : "()");
             GUTS = GUTS.Replace("$NULLCONSTBODY", "");
@@ -1179,7 +1197,9 @@ namespace FauxMessages
         {
             string[] pieces = s.Split('/');
             string package = parent.Package;
-            if (pieces.Length == 2)
+            // sometimes, a string can contain the char '/', such as the following line:
+            // string CONTENT_JSON = "application/json"
+            if (pieces.Length == 2 && !s.ToLower().Contains("string"))
             {
                 package = pieces[0];
                 s = pieces[1];
