@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- A modified version of YAMLParser.csproj, which runs on .NET Standard and builds using .NET Core CLI (allows for cross-compatibility) -->
 <Project Sdk="Microsoft.NET.Sdk">
-
+    
     <PropertyGroup>
         <TargetFramework>netcoreapp2.1</TargetFramework>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <PropertyGroup>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     </PropertyGroup>
     <PropertyGroup>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -28,24 +29,29 @@
         <DependentUpon>Templates.resx</DependentUpon>
         <AutoGen>True</AutoGen>
       </Compile>
+
       <Content Include="ROS_MESSAGES\README.txt" />
-      <None Include="TemplateProject\Interfaces.cs" />
+      <EmbeddedResource Include="TemplateProject\Interfaces.cs" />
       <None Include="app.config" />
       <None Include="TemplateProject\Time.cs" />
       <None Include="TemplateProject\String.cs" />
-      <None Include="TemplateProject\PlaceHolder._cs" />
-      <None Include="TemplateProject\AssemblyInfo._cs" />
+      <EmbeddedResource Include="TemplateProject\PlaceHolder._cs" />
+      <EmbeddedResource Include="TemplateProject\AssemblyInfo._cs" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="TemplateProject\Messages._csproj">
+      <EmbeddedResource Include="TemplateProject\MessagesNetCore._csproj">
         <SubType>Designer</SubType>
-      </None>
+      </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-      <None Include="TemplateProject\SrvPlaceHolder._cs" />
+      <EmbeddedResource Include="TemplateProject\SrvPlaceHolder._cs" />
       <None Include="TemplateProject\TempMessages._csproj">
         <SubType>Designer</SubType>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Templates.resx" />
     </ItemGroup>
     
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
