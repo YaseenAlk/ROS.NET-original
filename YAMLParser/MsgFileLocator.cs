@@ -1,14 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using FauxMessages;
 
 namespace YAMLParser
 {
     public class MsgFileLocation
     {
+        // Unicode categories according to https://stackoverflow.com/a/950651/4036588
+        private static readonly UnicodeCategory[] validFirstChars =
+        { 
+            UnicodeCategory.UppercaseLetter,    // Lu
+            UnicodeCategory.LowercaseLetter,    // Ll
+            UnicodeCategory.TitlecaseLetter,    // Lt
+            UnicodeCategory.ModifierLetter,     // Lm
+            UnicodeCategory.OtherLetter         // Lo
+            // underscore is also permitted for the first char
+        };
+        private static readonly UnicodeCategory[] otherValidChars = 
+        {
+            UnicodeCategory.LetterNumber,           // Nl
+            UnicodeCategory.NonSpacingMark,         // Mn
+            UnicodeCategory.SpacingCombiningMark,   // Mc
+            UnicodeCategory.DecimalDigitNumber,     // Nd
+            UnicodeCategory.ConnectorPunctuation,   // Pc
+            UnicodeCategory.Format                  // Cf
+        };
+        private static readonly UnicodeCategory[] validCSharpChars = validFirstChars.Union(otherValidChars).ToArray();
+
         private static string[] msg_gen_folder_names =
         {
             "msg",
@@ -51,6 +74,10 @@ namespace YAMLParser
             string foldername = innermostPath.Name;
             if (msg_gen_folder_names.Contains(foldername))
                 foldername = Directory.GetParent(innermostPath.FullName).Name;
+
+            if (!IsValidCSharpIdentifier(foldername))
+                throw new ArgumentException(String.Format("'{0}' from '{1}' is not a compatible C# identifier name\n\tThe package name must conform to C# Language Specifications (refer to this StackOverflow answer: https://stackoverflow.com/a/950651/4036588)\n", foldername, path));
+
             return foldername;
         }
 
@@ -74,6 +101,24 @@ namespace YAMLParser
         public override string  ToString()
         {
             return string.Format("{0}" + System.IO.Path.DirectorySeparatorChar + "{1}.{2}", package, basename, extension);
+        }
+
+        private static bool IsValidCSharpIdentifier(string toTest)
+        {
+            if (SingleType.IsCSharpKeyword(toTest)) // best to avoid any complications
+                return false;
+            
+            char[] letters = toTest.ToCharArray();
+            char first = letters[0];
+
+            if (first != '_' && !validFirstChars.Contains(CharUnicodeInfo.GetUnicodeCategory(first)))
+                return false;
+
+            foreach (char c in letters)
+                if (!validCSharpChars.Contains(CharUnicodeInfo.GetUnicodeCategory(c)))
+                    return false;
+            
+            return true;
         }
     }
 
