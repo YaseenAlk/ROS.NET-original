@@ -1227,13 +1227,10 @@ namespace FauxMessages
 
     public class SingleType
     {
-        // TODO extend check to other C# keywords
-        private static readonly string[] CSharpKeywords = reserved_keywords.Union(contextual_keywords).ToArray();
-
         // c# keywords listed on https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/ as of August 1st, 2018
-        private static string[] reserved_keywords = {"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "using static", "virtual", "void", "volatile", "while"};
-        private static string[] contextual_keywords = {"add", "alias", "ascending", "async", "await", "descending", "dynamic", "from", "get", "global", "group", "into", "join", "let", "nameof", "orderby", "partial", "partial", "remove", "select", "set", "value", "var", "when", "where", "where", "yield"};
-
+        private static readonly string[] reserved_keywords = {"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "using static", "virtual", "void", "volatile", "while"};
+        private static readonly string[] contextual_keywords = {"add", "alias", "ascending", "async", "await", "descending", "dynamic", "from", "get", "global", "group", "into", "join", "let", "nameof", "orderby", "partial", "partial", "remove", "select", "set", "value", "var", "when", "where", "where", "yield"};
+        private static readonly string[] CSharpKeywords = reserved_keywords.Union(contextual_keywords).ToArray();
 
         public bool Const;
         public string ConstValue = "";
@@ -1482,7 +1479,7 @@ namespace FauxMessages
             Name = name.Length == 0 ? otherstuff.Split('=')[0].Trim() : name;
         }
 
-        private static bool IsCSharpKeyword(string name)
+        public static bool IsCSharpKeyword(string name)
         {
             return CSharpKeywords.Contains(name);
         }
