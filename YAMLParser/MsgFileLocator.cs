@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using FauxMessages;
 
 namespace YAMLParser
@@ -119,6 +120,16 @@ namespace YAMLParser
                     return false;
             
             return true;
+
+            // TODO: fix this regex method, replace the above method with it, 
+            // and get rid of the three UnicodeCategory arrays
+            // (regex method found at https://stackoverflow.com/a/1904462/4036588)
+
+            //const string start = @"(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl})";
+            //const string extend = @"(\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\p{Cf})";
+            //Regex ident = new Regex(string.Format("{0}({0}|{1})*", start, extend));
+            //toTest = toTest.Normalize();
+            //return ident.IsMatch(toTest);
         }
     }
 
