@@ -78,7 +78,7 @@ namespace YAMLParser
 
             if (!IsValidCSharpIdentifier(foldername))
                 throw new ArgumentException(String.Format("'{0}' from '{1}' is not a compatible C# identifier name\n\tThe package name must conform to C# Language Specifications (refer to this StackOverflow answer: https://stackoverflow.com/a/950651/4036588)\n", foldername, path));
-
+            
             return foldername;
         }
 
@@ -106,6 +106,9 @@ namespace YAMLParser
 
         public static bool IsValidCSharpIdentifier(string toTest)
         {
+            if (toTest.Length == 0) // obviously..?
+                return false;
+            
             if (SingleType.IsCSharpKeyword(toTest)) // best to avoid any complications
                 return false;
             
