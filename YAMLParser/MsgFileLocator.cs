@@ -104,7 +104,7 @@ namespace YAMLParser
             return string.Format("{0}" + System.IO.Path.DirectorySeparatorChar + "{1}.{2}", package, basename, extension);
         }
 
-        private static bool IsValidCSharpIdentifier(string toTest)
+        public static bool IsValidCSharpIdentifier(string toTest)
         {
             if (SingleType.IsCSharpKeyword(toTest)) // best to avoid any complications
                 return false;
