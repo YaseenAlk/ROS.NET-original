@@ -118,7 +118,6 @@ namespace YAMLParser
                 Console.ReadLine();
             }
 #elif NETCOREAPP2_1
-            //args = new string[]{"/Users/yaseen/Documents/GitHub/ROS-NET-modified", "/Users/yaseen/Documents/GitHub/ROS-NET-modified/common_msgs/extremely_basic_msg"};
             if (args.Length < 1)
             {
                 Console.WriteLine("Usage:\tdotnet YAMLParser_NetCore.dll <DLL output path> [... other directories to search]\n\tThe Messages dll will be output to <DLL output folder>/Messages/Messages.dll");
@@ -129,7 +128,7 @@ namespace YAMLParser
 
             if (!Directory.Exists(specifiedOutput))
             {
-                Console.WriteLine("DLL Output Path does not exist");
+                Console.WriteLine("DLL Output Path (" + specifiedOutput + ") does not exist");
                 return;
             }
 
@@ -179,7 +178,11 @@ namespace YAMLParser
             GenerateFiles(msgsFiles, srvFiles);
             Console.WriteLine("Generating project...");
             GenerateProject(msgsFiles, srvFiles);
-            //BuildProjectMSBUILD();
+            Console.WriteLine("Building project...");
+            Console.WriteLine("------------------------------------");
+            BuildProjectNETCORE();
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine("Done!");
 #else
             Console.WriteLine("Unsupported TargetFramework. Must be .NET Framework v3.5 or .NET Core netcoreapp2.1");
             return;
@@ -428,6 +431,40 @@ namespace YAMLParser
                     Console.WriteLine(error);
                 Console.WriteLine("AMG BUILD FAIL!");
             }
+        }
+
+        public static void BuildProjectNETCORE()
+        {
+            //var process = new Process
+            //{
+            //    StartInfo = new ProcessStartInfo
+            //    {
+            //        FileName = "dotnet",
+            //        Arguments = "path\release\PublishOutput\proces.dll",
+            //        UseShellExecute = true,
+            //        RedirectStandardOutput = false,
+            //        RedirectStandardError = false,
+            //        CreateNoWindow = true
+            //    }
+
+            //};
+
+            Process process = new Process();
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = "publish -c Release -v q",
+                UseShellExecute = false,
+                CreateNoWindow = false,
+                WorkingDirectory = outputdir,
+                RedirectStandardOutput = false, //setting this to true makes process.WaitForExit() wait forever...
+                RedirectStandardError = false
+            };
+
+            process.StartInfo = info;
+            process.Start();
+            process.WaitForExit();
         }
 
         private static string uberpwnage;
